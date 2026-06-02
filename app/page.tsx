@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Flower2, Heart, Sparkles } from "lucide-react";
 
 export default function HomePage() {
@@ -27,7 +28,7 @@ export default function HomePage() {
         </p>
 
         {/* Tarjeta de saludo de ejemplo */}
-        <div className="tarjeta max-w-md mx-auto mt-12 text-left space-y-3">
+        <div className="tarjeta max-w-md mx-auto mt-8 text-left space-y-3">
           <p className="font-display text-3xl text-cacao">Hola Daniela,</p>
           <div className="space-y-2 text-cacao/75">
             <p className="flex items-center gap-2">
@@ -45,11 +46,19 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Estado del proyecto */}
-        <div className="mt-12 inline-flex items-center gap-2 px-4 py-2 bg-menta/30 rounded-full text-sm text-cacao/70">
-          <span className="w-2 h-2 bg-fertil rounded-full animate-pulse" />
-          Proyecto en construcción — Fase 1
+        {/* Botones de accion */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+          <Link href="/registro" className="btn-primario inline-block">
+            Crear mi cuenta
+          </Link>
+          <Link href="/login" className="btn-secundario inline-block">
+            Ya tengo cuenta
+          </Link>
         </div>
+
+        <p className="text-xs text-cacao/60 mt-2">
+          3 meses gratis. Sin tarjeta de crédito.
+        </p>
 
         {/* Pie */}
         <footer className="mt-16 text-xs text-niebla">
