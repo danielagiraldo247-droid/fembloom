@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import GoogleButton from "@/components/auth/google-button";
+import Divider from "@/components/auth/divider";
 
 /**
  * Formulario de inicio de sesion de FemBloom.
@@ -59,7 +61,13 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
+      {/* Boton de Google */}
+      <GoogleButton text="Continuar con Google" />
+
+      <Divider text="o con tu correo" />
+
+      <form onSubmit={handleSubmit} className="space-y-4">
       {/* Mensaje de error */}
       {error && (
         <div className="bg-error/15 border border-error/30 rounded-suave px-4 py-3 text-sm text-cacao">
@@ -141,6 +149,7 @@ export default function LoginForm() {
           ¿Olvidaste tu contraseña?
         </Link>
       </p>
-    </form>
+      </form>
+    </div>
   );
 }

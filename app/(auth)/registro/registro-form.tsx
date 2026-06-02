@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import GoogleButton from "@/components/auth/google-button";
+import Divider from "@/components/auth/divider";
 
 /**
  * Formulario de registro de FemBloom.
@@ -84,7 +86,13 @@ export default function RegistroForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
+      {/* Boton de Google */}
+      <GoogleButton text="Registrarme con Google" />
+
+      <Divider text="o con tu correo" />
+
+      <form onSubmit={handleSubmit} className="space-y-4">
       {/* Mensaje de error */}
       {error && (
         <div className="bg-error/15 border border-error/30 rounded-suave px-4 py-3 text-sm text-cacao">
@@ -182,6 +190,7 @@ export default function RegistroForm() {
         Al registrarte comienzas tu prueba gratuita de 3 meses con acceso
         completo a todas las funciones de FemBloom.
       </p>
-    </form>
+      </form>
+    </div>
   );
 }
