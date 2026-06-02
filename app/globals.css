@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: linear-gradient(180deg, #FDF6F0 0%, #FFF5F7 100%);
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: #F8C9D3;
+    color: #7D5A4F;
+  }
+}
+
+@layer components {
+  .btn-primario {
+    @apply bg-petalo text-cacao font-medium px-6 py-3 rounded-botón
+           shadow-petalo hover:shadow-md transition-all duration-300
+           hover:scale-[0.98] active:scale-[0.96];
+  }
+
+  .btn-secundario {
+    @apply border-2 border-petalo bg-crema text-coral font-medium
+           px-6 py-3 rounded-botón hover:bg-petalo/20 transition-all duration-300;
+  }
+
+  .tarjeta {
+    @apply bg-perla rounded-suave shadow-suave p-6;
+  }
+}
