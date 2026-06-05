@@ -1,25 +1,48 @@
-import { Calendar as CalendarIcon } from "lucide-react";
+import { requireUserAndOnboarding } from "@/lib/auth/helpers";
+import CalendarView from "./calendar-view";
 
 export const metadata = { title: "Calendario — FemBloom" };
 
-export default function CalendarioPage() {
-  return (
-    <div className="max-w-2xl mx-auto px-6 py-6 space-y-6 animate-florecer">
-      <header>
-        <h1 className="font-display text-4xl text-cacao">Tu calendario 📅</h1>
-        <p className="text-cacao/70 mt-1">
-          Aquí registrarás tu ciclo día a día
-        </p>
-      </header>
+/**
+ * Pagina de calendario.
+ *
+ * Trae la configuracion del ciclo y los registros diarios desde Supabase,
+ * y los pasa al componente cliente que maneja la interaccion.
+ */
+export default async function CalendarioPage() {
+  const { user, supabase } = await requireUserAndOnboarding();
 
-      <div className="tarjeta text-center py-12 space-y-3">
-        <CalendarIcon className="w-12 h-12 text-lavanda mx-auto" strokeWidth={1.5} />
-        <p className="text-cacao font-medium">Tu calendario llega mañana 🌸</p>
-        <p className="text-sm text-cacao/60 max-w-sm mx-auto">
-          Vamos paso a paso. Mañana tendrás un calendario completo
-          para registrar tu menstruación, síntomas y más.
+  // Configuracion del ciclo
+  const { data: cycleSettings } = await supabase
+    .from("cycle_settings")
+    .select("avg_cycle_length, avg_period_length, last_period_start")
+    .eq("user_id", user.id)
+    .single();
+
+  // Registros diarios (ultimos 200 para tener varios meses)
+  const { data: dailyLogs } = await supabase
+    .from("daily_logs")
+    .select("log_date, is_menstruation, flow_intensity")
+    .eq("user_id", user.id)
+    .order("log_date", { ascending: false })
+    .limit(200);
+
+  if (!cycleSettings?.last_period_start) {
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-6">
+        <p className="text-cacao">
+          Falta configurar tu ciclo. Vuelve al onboarding.
         </p>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <CalendarView
+      lastPeriodStart={cycleSettings.last_period_start}
+      cycleLength={cycleSettings.avg_cycle_length}
+      periodLength={cycleSettings.avg_period_length}
+      initialLogs={dailyLogs || []}
+    />
   );
 }
