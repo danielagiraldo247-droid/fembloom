@@ -1,6 +1,7 @@
 import { requireUserAndOnboarding } from "@/lib/auth/helpers";
-import { Mail, Calendar, Target, Heart } from "lucide-react";
+import { Mail, Calendar, Target, Heart, Shield } from "lucide-react";
 import LogoutButton from "./logout-button";
+import DiscreteToggle from "./discrete-toggle";
 
 export const metadata = { title: "Mi perfil — FemBloom" };
 
@@ -15,7 +16,7 @@ export default async function PerfilPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, avatar_url, trial_ends_at, subscription_status, objective")
+    .select("full_name, avatar_url, trial_ends_at, subscription_status, objective, discrete_mode")
     .eq("id", user.id)
     .single();
 
@@ -124,6 +125,15 @@ export default async function PerfilPage() {
             </span>
           </div>
         </div>
+      </section>
+
+      {/* Privacidad */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-cacao/80 uppercase tracking-wider px-1 flex items-center gap-1.5">
+          <Shield className="w-3.5 h-3.5" />
+          Privacidad
+        </h2>
+        <DiscreteToggle initialValue={profile?.discrete_mode || false} />
       </section>
 
       {/* Cerrar sesion */}

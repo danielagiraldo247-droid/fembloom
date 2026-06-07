@@ -13,6 +13,9 @@ import {
   Calendar as CalendarIcon,
   ChevronRight,
   Activity,
+  MessageCircle,
+  Pill,
+  NotebookPen,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -320,7 +323,61 @@ export default async function AgendaPage() {
                 Conoce más sobre tu cuerpo
               </p>
               <p className="text-xs text-cacao/60">
-                Artículos sobre tu fase actual
+                15 artículos para entender tu ciclo
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-cacao/40 group-hover:text-coral transition" />
+          </Link>
+
+          <Link
+            href="/consejera"
+            className="tarjeta flex items-center gap-3 hover:shadow-petalo transition group bg-gradient-to-br from-petalo/15 to-bruma/15"
+          >
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-petalo to-coral flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="w-5 h-5 text-white" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-cacao text-sm">
+                Habla con Bloom ✨
+              </p>
+              <p className="text-xs text-cacao/60">
+                Tu consejera virtual con IA
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-cacao/40 group-hover:text-coral transition" />
+          </Link>
+
+          <Link
+            href="/diario"
+            className="tarjeta flex items-center gap-3 hover:shadow-petalo transition group"
+          >
+            <div className="w-10 h-10 rounded-full bg-bruma/40 flex items-center justify-center flex-shrink-0">
+              <NotebookPen className="w-5 h-5 text-lavanda" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-cacao text-sm">
+                Mi diario privado
+              </p>
+              <p className="text-xs text-cacao/60">
+                Escribe tus emociones y reflexiones
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-cacao/40 group-hover:text-coral transition" />
+          </Link>
+
+          <Link
+            href="/planificacion"
+            className="tarjeta flex items-center gap-3 hover:shadow-petalo transition group"
+          >
+            <div className="w-10 h-10 rounded-full bg-menta/40 flex items-center justify-center flex-shrink-0">
+              <Pill className="w-5 h-5 text-fertil" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-cacao text-sm">
+                Planificación familiar
+              </p>
+              <p className="text-xs text-cacao/60">
+                Configura tu método anticonceptivo
               </p>
             </div>
             <ChevronRight className="w-4 h-4 text-cacao/40 group-hover:text-coral transition" />
