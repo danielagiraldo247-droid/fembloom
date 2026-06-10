@@ -1,5 +1,6 @@
 import { requireUserAndOnboarding } from "@/lib/auth/helpers";
-import { Mail, Calendar, Target, Heart, Shield } from "lucide-react";
+import { Mail, Calendar, Target, Heart, Shield, Crown, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import LogoutButton from "./logout-button";
 import DiscreteToggle from "./discrete-toggle";
 
@@ -125,6 +126,27 @@ export default async function PerfilPage() {
             </span>
           </div>
         </div>
+      </section>
+
+      {/* Suscripcion */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-cacao/80 uppercase tracking-wider px-1 flex items-center gap-1.5">
+          <Crown className="w-3.5 h-3.5" />
+          Suscripción
+        </h2>
+        <Link
+          href="/suscripcion"
+          className="tarjeta flex items-center gap-3 hover:shadow-petalo transition group"
+        >
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-petalo to-coral flex items-center justify-center">
+            <Crown className="w-5 h-5 text-white" strokeWidth={1.5} />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-cacao text-sm">Mi plan</p>
+            <p className="text-xs text-cacao/60">Gestiona tu suscripción</p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-cacao/40 group-hover:text-coral transition" />
+        </Link>
       </section>
 
       {/* Privacidad */}

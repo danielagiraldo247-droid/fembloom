@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+// Modelo actualizado: usa el flash mas reciente disponible
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 const SYSTEM_PROMPT = `Eres Bloom, la consejera virtual de FemBloom. Eres calida, empatica y cercana, como una amiga que entiende.
 
@@ -131,13 +132,15 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Gemini error:", errorText);
-      return NextResponse.json(
-        {
-          error:
-            "No pude conectar con la consejera. Por favor intenta de nuevo en un momento.",
-        },
-        { status: 500 }
-      );
+
+      let userMessage = "No pude conectar con la consejera. Intenta de nuevo en un momento.";
+      if (errorText.includes("API key not valid") || errorText.includes("API_KEY_INVALID")) {
+        userMessage = "La consejera no esta configurada correctamente. Si eres la administradora, revisa la API key de Gemini.";
+      } else if (errorText.includes("quota") || errorText.includes("QUOTA")) {
+        userMessage = "Hemos alcanzado el limite de consultas por hoy. Intenta de nuevo manana.";
+      }
+
+      return NextResponse.json({ error: userMessage }, { status: 500 });
     }
 
     const data = await response.json();
