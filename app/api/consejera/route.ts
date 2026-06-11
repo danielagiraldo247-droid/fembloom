@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-// Modelo actualizado: usa el flash mas reciente disponible
+// Modelo estable y gratuito disponible en todos los tiers
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
 
 const SYSTEM_PROMPT = `Eres Bloom, la consejera virtual de FemBloom. Eres calida, empatica y cercana, como una amiga que entiende.
 
