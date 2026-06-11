@@ -3,6 +3,7 @@ import { Mail, Calendar, Target, Heart, Shield, Crown, ChevronRight } from "luci
 import Link from "next/link";
 import LogoutButton from "./logout-button";
 import DiscreteToggle from "./discrete-toggle";
+import PrivacyActions from "./privacy-actions";
 
 export const metadata = { title: "Mi perfil — FemBloom" };
 
@@ -156,6 +157,7 @@ export default async function PerfilPage() {
           Privacidad
         </h2>
         <DiscreteToggle initialValue={profile?.discrete_mode || false} />
+        <PrivacyActions />
       </section>
 
       {/* Cerrar sesion */}

@@ -384,6 +384,24 @@ export default async function AgendaPage() {
           </Link>
 
           <Link
+            href="/historiales"
+            className="tarjeta flex items-center gap-3 hover:shadow-petalo transition group"
+          >
+            <div className="w-10 h-10 rounded-full bg-bruma/40 flex items-center justify-center flex-shrink-0">
+              <Activity className="w-5 h-5 text-lavanda" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-cacao text-sm">
+                Mis historiales
+              </p>
+              <p className="text-xs text-cacao/60">
+                Ciclos, síntomas, ánimo, relaciones
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-cacao/40 group-hover:text-coral transition" />
+          </Link>
+
+          <Link
             href="/reportes"
             className="tarjeta flex items-center gap-3 hover:shadow-petalo transition group"
           >
