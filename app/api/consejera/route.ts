@@ -5,6 +5,52 @@ import { createClient } from "@/lib/supabase/server";
 const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
 
+/**
+ * Respuestas de respaldo cuando la API de Gemini no responde.
+ * Detecta palabras clave y devuelve respuestas empaticas pre-armadas.
+ */
+function generateFallbackResponse(message: string): string {
+  const lower = message.toLowerCase();
+
+  if (lower.includes("colico") || lower.includes("cólico") || lower.includes("dolor")) {
+    return "Los cólicos menstruales son muy comunes 🌸. Pasan porque tu útero se contrae para expulsar el revestimiento. Te ayudan: una bolsa caliente sobre el abdomen, té de manzanilla o jengibre, ejercicio suave como yoga, y dormir bien. Si el dolor es muy fuerte o interfiere con tu vida diaria, consulta a tu ginecóloga — podría ser endometriosis.";
+  }
+
+  if (lower.includes("ovular") || lower.includes("ovulación") || lower.includes("ovulacion") || lower.includes("ovulo") || lower.includes("óvulo")) {
+    return "La ovulación ocurre aproximadamente 14 días antes de tu próximo período. Puedes notar: flujo cervical tipo clara de huevo, leve dolor en un costado, más energía y libido. En FemBloom puedes ver tu ovulación estimada en el calendario 🌷.";
+  }
+
+  if (lower.includes("embarazo") || lower.includes("embarazada")) {
+    return "Las señales tempranas de embarazo incluyen: retraso menstrual, senos sensibles, cansancio, náuseas y orinar más. Si tu período se atrasa, hazte un test de embarazo (mejor con la primera orina de la mañana). Si sale positivo, agenda consulta con tu ginecóloga 💕.";
+  }
+
+  if (lower.includes("pastilla") || lower.includes("anticonceptiv")) {
+    return "Las pastillas anticonceptivas tienen 91-99% de efectividad si las tomas todos los días a la misma hora. Funcionan evitando la ovulación. Si olvidas una: si fue hace menos de 12 horas, tómala apenas recuerdes; si fue más, usa protección adicional 7 días. En el centro de planificación de FemBloom puedes configurar recordatorios diarios 💊.";
+  }
+
+  if (lower.includes("ciclo") || lower.includes("regular")) {
+    return "Tu ciclo se considera normal entre 21-45 días. Los ciclos irregulares pueden ser por estrés, cambios de peso, ejercicio extremo, o condiciones como SOP. Llevar registro en FemBloom te ayuda a detectar patrones. Si tienes ciclos muy irregulares por mucho tiempo, consulta a tu médica 🌸.";
+  }
+
+  if (lower.includes("triste") || lower.includes("sensible") || lower.includes("animo") || lower.includes("ánimo") || lower.includes("ansiedad")) {
+    return "Las hormonas que regulan tu ciclo también afectan tu cerebro. Sentirte sensible, triste o ansiosa antes del período es completamente normal — no estás 'exagerando'. Te ayudan: aceptar tus emociones sin juzgarte, dormir bien, reducir cafeína y azúcar, ejercicio suave. Si los síntomas son muy intensos consistentemente, podría ser TDPM y vale la pena consultar 💕.";
+  }
+
+  if (lower.includes("flujo") || lower.includes("vagina") || lower.includes("descarga")) {
+    return "El flujo vaginal cambia durante tu ciclo. Después del período es escaso, antes de ovular es como clara de huevo (más fértil), después de ovular es cremoso. Si notas mal olor, picor, color amarillo/verde o textura grumosa, podría ser una infección — consulta a tu médica 🌷.";
+  }
+
+  if (lower.includes("sintoma") || lower.includes("síntoma")) {
+    return "Los síntomas más comunes durante el ciclo son: cólicos, dolor de cabeza, sensibilidad pectoral, cambios de humor, antojos, fatiga, hinchazón. En FemBloom puedes registrar tus síntomas en el calendario y ver patrones. Esto es muy útil para llevar a tu ginecóloga 🌸.";
+  }
+
+  if (lower.includes("hola") || lower.includes("bloom") || lower.length < 15) {
+    return "¡Hola! Soy Bloom, tu consejera virtual 🌸. Puedo orientarte sobre tu ciclo menstrual, fertilidad, métodos anticonceptivos y bienestar emocional. Cuéntame, ¿qué te gustaría saber?";
+  }
+
+  return "Esa es una buena pregunta. Te recomiendo explorar la sección 'Conócete' donde hay 15 artículos sobre tu ciclo, fertilidad, anticonceptivos y bienestar. Si tu pregunta es muy específica o preocupante, consulta a tu ginecóloga para una respuesta personalizada 💕.";
+}
+
 const SYSTEM_PROMPT = `Eres Bloom, la consejera virtual de FemBloom. Eres calida, empatica y cercana, como una amiga que entiende.
 
 REGLAS DE COMUNICACION:
@@ -133,14 +179,9 @@ export async function POST(req: NextRequest) {
       const errorText = await response.text();
       console.error("Gemini error:", errorText);
 
-      let userMessage = "No pude conectar con la consejera. Intenta de nuevo en un momento.";
-      if (errorText.includes("API key not valid") || errorText.includes("API_KEY_INVALID")) {
-        userMessage = "La consejera no esta configurada correctamente. Si eres la administradora, revisa la API key de Gemini.";
-      } else if (errorText.includes("quota") || errorText.includes("QUOTA")) {
-        userMessage = "Hemos alcanzado el limite de consultas por hoy. Intenta de nuevo manana.";
-      }
-
-      return NextResponse.json({ error: userMessage }, { status: 500 });
+      // Fallback empatico cuando la API no esta disponible
+      const fallbackMessage = generateFallbackResponse(message);
+      return NextResponse.json({ message: fallbackMessage });
     }
 
     const data = await response.json();
