@@ -73,10 +73,10 @@ export default function DayModal({
 
   const [note, setNote] = useState("");
 
-  const [hasRelation, setHasRelation] = useState(false);
-  const [withProtection, setWithProtection] = useState(true);
-  const [relationTime, setRelationTime] = useState("");
-  const [relationObservation, setRelationObservation] = useState("");
+  // Lista de relaciones del dia (se pueden tener varias)
+  const [relations, setRelations] = useState<
+    Array<{ with_protection: boolean; observation: string }>
+  >([]);
 
   // === Estados de UI ===
   const [loading, setLoading] = useState(false);
@@ -124,18 +124,21 @@ export default function DayModal({
         setSelectedMoods(new Set(mds.map((m: { mood_type: MoodType }) => m.mood_type)));
       }
 
-      // Relacion
-      const { data: rel } = await supabase
+      // Relaciones del dia (multiples)
+      const { data: rels } = await supabase
         .from("relations")
-        .select("with_protection, relation_time, observation")
+        .select("with_protection, observation")
         .eq("user_id", user.id)
-        .eq("relation_date", dateStr)
-        .maybeSingle();
-      if (rel) {
-        setHasRelation(true);
-        setWithProtection(rel.with_protection);
-        setRelationTime(rel.relation_time || "");
-        setRelationObservation(rel.observation || "");
+        .eq("relation_date", dateStr);
+      if (rels && rels.length > 0) {
+        setRelations(
+          rels.map(
+            (r: { with_protection: boolean; observation: string | null }) => ({
+              with_protection: r.with_protection,
+              observation: r.observation || "",
+            })
+          )
+        );
       }
 
       setFetching(false);
@@ -230,16 +233,22 @@ export default function DayModal({
         if (moodError) throw moodError;
       }
 
-      // 4. Reemplazar relacion
-      await supabase.from("relations").delete().eq("user_id", user.id).eq("relation_date", dateStr);
-      if (hasRelation) {
-        const { error: relError } = await supabase.from("relations").insert({
+      // 4. Reemplazar relaciones (pueden ser varias)
+      await supabase
+        .from("relations")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("relation_date", dateStr);
+      if (relations.length > 0) {
+        const relationsToInsert = relations.map((r) => ({
           user_id: user.id,
           relation_date: dateStr,
-          relation_time: relationTime || null,
-          with_protection: withProtection,
-          observation: relationObservation.trim() || null,
-        });
+          with_protection: r.with_protection,
+          observation: r.observation.trim() || null,
+        }));
+        const { error: relError } = await supabase
+          .from("relations")
+          .insert(relationsToInsert);
         if (relError) throw relError;
       }
 
@@ -350,14 +359,8 @@ export default function DayModal({
               )}
               {activeTab === "relation" && (
                 <RelationSection
-                  hasRelation={hasRelation}
-                  setHasRelation={setHasRelation}
-                  withProtection={withProtection}
-                  setWithProtection={setWithProtection}
-                  relationTime={relationTime}
-                  setRelationTime={setRelationTime}
-                  relationObservation={relationObservation}
-                  setRelationObservation={setRelationObservation}
+                  relations={relations}
+                  setRelations={setRelations}
                 />
               )}
             </div>
@@ -656,114 +659,127 @@ function NotesSection({
 }
 
 function RelationSection({
-  hasRelation,
-  setHasRelation,
-  withProtection,
-  setWithProtection,
-  relationTime,
-  setRelationTime,
-  relationObservation,
-  setRelationObservation,
+  relations,
+  setRelations,
 }: {
-  hasRelation: boolean;
-  setHasRelation: (v: boolean) => void;
-  withProtection: boolean;
-  setWithProtection: (v: boolean) => void;
-  relationTime: string;
-  setRelationTime: (v: string) => void;
-  relationObservation: string;
-  setRelationObservation: (v: string) => void;
+  relations: Array<{ with_protection: boolean; observation: string }>;
+  setRelations: React.Dispatch<
+    React.SetStateAction<Array<{ with_protection: boolean; observation: string }>>
+  >;
 }) {
+  function addRelation() {
+    setRelations((prev) => [
+      ...prev,
+      { with_protection: true, observation: "" },
+    ]);
+  }
+
+  function removeRelation(index: number) {
+    setRelations((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function updateRelation(
+    index: number,
+    field: "with_protection" | "observation",
+    value: boolean | string
+  ) {
+    setRelations((prev) =>
+      prev.map((r, i) => (i === index ? { ...r, [field]: value } : r))
+    );
+  }
+
   return (
     <div className="space-y-3 animate-florecer">
-      <button
-        onClick={() => setHasRelation(!hasRelation)}
-        className={`w-full flex items-center justify-between p-4 rounded-suave border-2 transition ${
-          hasRelation
-            ? "border-coral bg-petalo/20"
-            : "border-petalo/30 bg-crema hover:border-petalo"
-        }`}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              hasRelation ? "bg-coral" : "bg-petalo/40"
-            }`}
-          >
-            <Heart
-              className={`w-5 h-5 ${hasRelation ? "text-white" : "text-coral"}`}
-              fill={hasRelation ? "white" : "none"}
-            />
-          </div>
-          <div className="text-left">
-            <p className="font-medium text-cacao">Tuve relación</p>
-            <p className="text-xs text-cacao/60">
-              {hasRelation ? "Registrada" : "Tócame para registrar"}
-            </p>
-          </div>
-        </div>
-        <div
-          className={`w-12 h-6 rounded-full transition-colors relative ${
-            hasRelation ? "bg-coral" : "bg-cacao/20"
-          }`}
+      {/* Encabezado con contador */}
+      <div className="flex items-center justify-between px-1">
+        <p className="text-sm text-cacao/70">
+          {relations.length === 0
+            ? "Sin relaciones registradas"
+            : `${relations.length} ${
+                relations.length === 1 ? "relación" : "relaciones"
+              } registrada${relations.length === 1 ? "" : "s"}`}
+        </p>
+        <button
+          onClick={addRelation}
+          className="text-xs bg-coral text-white px-3 py-1.5 rounded-full hover:bg-coral/90 transition flex items-center gap-1"
         >
-          <div
-            className={`absolute top-0.5 w-5 h-5 bg-perla rounded-full transition-all ${
-              hasRelation ? "right-0.5" : "left-0.5"
-            }`}
-          />
+          <Heart className="w-3 h-3" fill="white" />
+          Agregar
+        </button>
+      </div>
+
+      {/* Lista de relaciones */}
+      {relations.length === 0 ? (
+        <div className="text-center py-8 space-y-2 text-cacao/60">
+          <Heart className="w-8 h-8 mx-auto text-petalo" strokeWidth={1.5} />
+          <p className="text-sm">Toca &quot;Agregar&quot; para registrar una relación</p>
+          <p className="text-xs">
+            Puedes registrar varias relaciones en el mismo día
+          </p>
         </div>
-      </button>
-
-      {hasRelation && (
-        <div className="space-y-3 animate-florecer">
-          {/* Proteccion */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setWithProtection(true)}
-              className={`p-3 rounded-suave border-2 text-sm transition ${
-                withProtection
-                  ? "border-fertil bg-menta/30"
-                  : "border-petalo/30 bg-crema hover:border-petalo"
-              }`}
+      ) : (
+        <div className="space-y-3">
+          {relations.map((rel, idx) => (
+            <div
+              key={idx}
+              className="border-2 border-petalo/40 rounded-suave p-3 space-y-3 bg-crema"
             >
-              🛡️ Con protección
-            </button>
-            <button
-              onClick={() => setWithProtection(false)}
-              className={`p-3 rounded-suave border-2 text-sm transition ${
-                !withProtection
-                  ? "border-coral bg-petalo/20"
-                  : "border-petalo/30 bg-crema hover:border-petalo"
-              }`}
-            >
-              ⚠️ Sin protección
-            </button>
-          </div>
+              {/* Header de cada relación */}
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-cacao/70 uppercase tracking-wider">
+                  Relación #{idx + 1}
+                </p>
+                <button
+                  onClick={() => removeRelation(idx)}
+                  className="p-1.5 rounded-full text-error/70 hover:bg-error/10 transition"
+                  aria-label="Eliminar relación"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
-          {/* Hora */}
-          <div className="space-y-1">
-            <label className="text-xs text-cacao/70">Hora (opcional)</label>
-            <input
-              type="time"
-              value={relationTime}
-              onChange={(e) => setRelationTime(e.target.value)}
-              className="w-full px-3 py-2 rounded-suave border border-petalo/40 bg-perla text-cacao focus:border-coral focus:outline-none transition"
-            />
-          </div>
+              {/* Protección */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => updateRelation(idx, "with_protection", true)}
+                  className={`p-2.5 rounded-suave border-2 text-xs transition ${
+                    rel.with_protection
+                      ? "border-fertil bg-menta/30"
+                      : "border-petalo/30 bg-perla hover:border-petalo"
+                  }`}
+                >
+                  🛡️ Con protección
+                </button>
+                <button
+                  onClick={() => updateRelation(idx, "with_protection", false)}
+                  className={`p-2.5 rounded-suave border-2 text-xs transition ${
+                    !rel.with_protection
+                      ? "border-coral bg-petalo/20"
+                      : "border-petalo/30 bg-perla hover:border-petalo"
+                  }`}
+                >
+                  ⚠️ Sin protección
+                </button>
+              </div>
 
-          {/* Observacion */}
-          <div className="space-y-1">
-            <label className="text-xs text-cacao/70">Observación (opcional)</label>
-            <textarea
-              value={relationObservation}
-              onChange={(e) => setRelationObservation(e.target.value)}
-              maxLength={200}
-              rows={2}
-              placeholder="Notas privadas..."
-              className="w-full px-3 py-2 rounded-suave border border-petalo/40 bg-perla text-cacao placeholder:text-cacao/40 focus:border-coral focus:outline-none transition resize-none"
-            />
-          </div>
+              {/* Observación */}
+              <div className="space-y-1">
+                <label className="text-xs text-cacao/70">
+                  Observación (opcional)
+                </label>
+                <textarea
+                  value={rel.observation}
+                  onChange={(e) =>
+                    updateRelation(idx, "observation", e.target.value)
+                  }
+                  maxLength={200}
+                  rows={2}
+                  placeholder="Notas privadas..."
+                  className="w-full px-3 py-2 rounded-suave border border-petalo/40 bg-perla text-cacao placeholder:text-cacao/40 focus:border-coral focus:outline-none transition resize-none text-sm"
+                />
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
