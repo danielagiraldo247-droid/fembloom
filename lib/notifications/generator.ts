@@ -1,6 +1,7 @@
-import { addDays, differenceInDays, parseISO, format } from "date-fns";
+import { differenceInDays, parseISO, format } from "date-fns";
 import { es } from "date-fns/locale";
 import { calculateCycleInfo } from "@/lib/cycle/calculations";
+import { getColombiaDate } from "@/lib/time/colombia";
 
 export interface Notification {
   id: string;
@@ -33,7 +34,7 @@ interface Args {
 export function generateNotifications(args: Args): Notification[] {
   const { cycleSettings, contraceptiveMethod, discreteMode } = args;
   const notifications: Notification[] = [];
-  const today = new Date();
+  const today = getColombiaDate();
 
   if (!cycleSettings?.last_period_start) return notifications;
 

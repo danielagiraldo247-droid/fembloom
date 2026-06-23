@@ -5,6 +5,7 @@ import { getDailyFeeling, getPhaseGreeting } from "@/lib/cycle/feelings";
 import FertilityLine from "@/components/fertility-map/fertility-line";
 import { parseISO, format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
+import { getColombiaDate, getColombiaGreeting } from "@/lib/time/colombia";
 import {
   Droplet,
   Sparkles,
@@ -74,9 +75,12 @@ export default async function AgendaPage() {
 
   const nombre = profile?.full_name?.split(" ")[0] || "amiga";
 
+  // Hora actual en zona horaria de Colombia (UTC-5)
+  const colombiaNow = getColombiaDate();
+
   // Calculo del ciclo HOY
   const cycleInfo = calculateCycleInfo(
-    new Date(),
+    colombiaNow,
     parseISO(cycle.last_period_start),
     cycle.avg_cycle_length,
     cycle.avg_period_length
@@ -85,7 +89,7 @@ export default async function AgendaPage() {
   // Probabilidad de embarazo
   const recentRelations = relations
     .filter((r: { relation_date: string }) => {
-      const diff = differenceInDays(new Date(), parseISO(r.relation_date));
+      const diff = differenceInDays(colombiaNow, parseISO(r.relation_date));
       return diff <= 7 && diff >= 0;
     })
     .map((r: { relation_date: string; with_protection: boolean }) => ({
@@ -105,20 +109,18 @@ export default async function AgendaPage() {
   // Última relación registrada
   const lastRelation = relations[0];
   const daysSinceLastRelation = lastRelation
-    ? differenceInDays(new Date(), parseISO(lastRelation.relation_date))
+    ? differenceInDays(colombiaNow, parseISO(lastRelation.relation_date))
     : null;
 
   // Días para próximos eventos
   const daysToNextPeriod = Math.max(0, cycleInfo.daysToNextPeriod);
   const daysToOvulation = Math.max(
     0,
-    differenceInDays(cycleInfo.ovulationDate, new Date())
+    differenceInDays(cycleInfo.ovulationDate, colombiaNow)
   );
 
-  // Saludo según hora del día
-  const hour = new Date().getHours();
-  const timeGreeting =
-    hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
+  // Saludo según hora del día EN COLOMBIA
+  const timeGreeting = getColombiaGreeting();
 
   return (
     <div className="max-w-2xl mx-auto px-5 py-6 space-y-5 animate-florecer">
