@@ -4,6 +4,7 @@ import Link from "next/link";
 import LogoutButton from "./logout-button";
 import DiscreteToggle from "./discrete-toggle";
 import PrivacyActions from "./privacy-actions";
+import TwoFactorAuth from "./two-factor-auth";
 
 export const metadata = { title: "Mi perfil — FemBloom" };
 
@@ -148,6 +149,15 @@ export default async function PerfilPage() {
           </div>
           <ChevronRight className="w-4 h-4 text-cacao/40 group-hover:text-coral transition" />
         </Link>
+      </section>
+
+      {/* Seguridad - 2FA */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-cacao/80 uppercase tracking-wider px-1 flex items-center gap-1.5">
+          <Shield className="w-3.5 h-3.5" />
+          Seguridad de la cuenta
+        </h2>
+        <TwoFactorAuth />
       </section>
 
       {/* Privacidad */}

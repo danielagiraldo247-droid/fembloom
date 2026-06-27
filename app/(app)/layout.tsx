@@ -1,6 +1,7 @@
 import { requireUserAndOnboarding } from "@/lib/auth/helpers";
 import AppHeader from "@/components/nav/app-header";
 import BottomNav from "@/components/nav/bottom-nav";
+import IdleTimeout from "@/components/auth/idle-timeout";
 import { generateNotifications } from "@/lib/notifications/generator";
 
 /**
@@ -53,6 +54,7 @@ export default async function AppLayout({
       />
       <main className="pb-24 min-h-[calc(100vh-200px)]">{children}</main>
       <BottomNav />
+      <IdleTimeout />
     </>
   );
 }

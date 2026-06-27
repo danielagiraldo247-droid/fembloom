@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import LoginForm from "./login-form";
 
 export const metadata = {
@@ -17,7 +18,9 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <LoginForm />
+      <Suspense fallback={<div className="py-4 text-center text-cacao/60">Cargando...</div>}>
+        <LoginForm />
+      </Suspense>
 
       <p className="text-center text-sm text-cacao/70">
         ¿Aún no tienes cuenta?{" "}
